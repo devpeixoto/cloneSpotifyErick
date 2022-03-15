@@ -1,10 +1,11 @@
-import { config } from "./config.js"
+import config from "./config.js"
 import { Controller } from "./controller.js"
 import { logger } from "./util.js"
 const {
     location,
     pages: {
-        homeHTML
+        homeHTML,
+        controllerHTML
     }
 } = config
 const controller = new Controller()
@@ -13,22 +14,35 @@ async function routes(request, response) {
 
     if (method === 'GET' && url === '/') {
         response.writeHead(302, {
-            'location': location.home
+            'Location': location.home
         })
-        response.end()
+        return response.end()
     }
     if (method === 'GET' && url === '/home') {
         const {
             stream, type
-        } = await controller.getFileStream(homeHTML)
+        } = await controller.getFileStream(controllerHTML)
         //PADRÃO DO RESPONSE é text/html
         // response.writeHead(200, {
         //     'content-Type': 'text/html'
         // })
         return stream.pipe(response)
     }
-
-    return response.end('hello')
+    if (method === 'GET' && url === '/controller') {
+        const {
+            stream
+        } = await controller.getFileStream(controllerHTML)
+        //PADRÃO DO RESPONSE é text/html
+        // response.writeHead(200, {
+        //     'content-Type': 'text/html'
+        // })
+        return stream.pipe(response)
+    }
+    if (method === 'GET') {
+        return
+    }
+    response.writeHead(404)
+    return response.end()
 }
 
 
